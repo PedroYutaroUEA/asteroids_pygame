@@ -1,4 +1,3 @@
-
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file defines the interactive game entities and their local behaviors.
 
@@ -7,8 +6,8 @@ from random import uniform
 
 import pygame as pg
 
-import config as C
-from utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
+import src.config as C
+from src.deprecated.utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
 
 
 class Bullet(pg.sprite.Sprite):
@@ -78,8 +77,7 @@ class Asteroid(pg.sprite.Sprite):
             ang = i * (360 / steps)
             jitter = uniform(0.75, 1.2)
             r = self.r * jitter
-            v = Vec(math.cos(math.radians(ang)),
-                    math.sin(math.radians(ang)))
+            v = Vec(math.cos(math.radians(ang)), math.sin(math.radians(ang)))
             pts.append(v * r)
         return pts
 
