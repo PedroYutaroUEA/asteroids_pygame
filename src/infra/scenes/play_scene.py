@@ -7,6 +7,7 @@ from src.core.engine import SimulationEngine
 
 from src.infra.managers.input_manager import InputManager
 
+from src.infra.managers.sound_manager import SoundManager
 from src.infra.renderers.ui.hud import HUDRenderer
 from src.infra.renderers.ui.hud_info import HUDInfo
 
@@ -26,6 +27,7 @@ class PlayScene(BaseScene):
         super().__init__(manager, assets)
         self.engine = SimulationEngine()
         self.input_manager = InputManager()
+        self.sound_manager = SoundManager(assets)
 
         self.entity_sprite_map: dict[str, EntityRenderer] = {
             "SHIP": ShipRenderer,
@@ -35,33 +37,11 @@ class PlayScene(BaseScene):
             "UFO_BULLET": BulletRenderer,
         }
 
-        # Guarda referência do som de thrust para controle contínuo
-        self.thrust_sound = self.assets.get_sound("spaceship1")
-        self.ufo_loop_sound = self.assets.get_sound(
-            "bomber"
-        )  # Usando bomber.wav para o UFO
-        self.thrust_playing = False  # controla se o som já está tocando
-        self.ufo_playing = False
-
     def handle_events(self, events: list[pg.event.Event]):
         self.input_manager.update(events)
         if self.input_manager.impulses["EXIT"]:
-            # Garante que o som de thrust para ao sair
-            if self.thrust_sound:
-                self.thrust_sound.stop()
+            self.sound_manager.stop_all()
             self.manager.switch_to("menu")
-
-    def _play_sfx(self, key, volume=1.0):
-        sound = self.assets.get_sound(key)
-        if sound:
-            sound.set_volume(volume)
-            sound.play()
-
-    def _stop_all_loops(self):
-        if self.thrust_sound:
-            self.thrust_sound.stop()
-        if self.ufo_loop_sound:
-            self.ufo_loop_sound.stop()
 
     def update(self, dt: float):
         old_score = self.engine.score
@@ -78,13 +58,9 @@ class PlayScene(BaseScene):
             # Thrust com som contínuo
             if self.input_manager.commands["THRUST"]:
                 ship.apply_thrust(dt)
-                if self.thrust_sound and not self.thrust_playing:
-                    self.thrust_sound.play(loops=-1)
-                    self.thrust_playing = True
+                self.sound_manager.start_loop("spaceship1", "thrust", volume=0.4)
             else:
-                if self.thrust_sound and self.thrust_playing:
-                    self.thrust_sound.stop()
-                    self.thrust_playing = False
+                self.sound_manager.stop_loop("thrust")
 
             # Tiro
             if self.input_manager.impulses["FIRE"]:
@@ -93,7 +69,7 @@ class PlayScene(BaseScene):
                     self.engine.spawner.spawn_bullet(
                         fire_data["pos"], fire_data["vel"], "SHIP"
                     )
-                    self._play_sfx("shot", volume=0.5)
+                    self.sound_manager.play_sfx("shot", volume=0.5)
 
             # Hyperspace
             if self.input_manager.impulses["HYPER"]:
@@ -104,36 +80,30 @@ class PlayScene(BaseScene):
         # Atualiza simulação
         self.engine.update(dt)
 
-        # 4. PROCESSAMENTO DE EVENTOS SONOROS (INFRA)
+        # A. Loop do UFO (Apareceu/Sumiu)
+        has_ufo = any(e.type == "UFO" for e in self.engine.entities)
+        if has_ufo:
+            self.sound_manager.start_loop("alien", "ufo_env", volume=0.5)
+        else:
+            self.sound_manager.stop_loop("ufo_env")
 
-        # A. Perda de Vida (Crash)
+        # B. Perda de Vida (Crash)
         if self.engine.lives < old_lives:
-            self._play_sfx("crash", volume=0.7)
+            self.sound_manager.play_sfx("crash", volume=1.0)
 
-        # B. Pontuação (Destruição)
+        # C. Pontuação (Destruição)
         if self.engine.score > old_score:
-            self._play_sfx("objectdestroyed", volume=0.4)
+            self.sound_manager.play_sfx("objectdestroyed", volume=0.6)
 
-        # C. Eventos do Core (Disparo do UFO)
+        # D. Eventos vindos do Core (TIRO DO UFO)
         for event in self.engine.events:
             if event == "UFO_FIRE":
-                self._play_sfx("shot", volume=0.3)  # Tiro do UFO é mais baixo
-
-        # D. Loop do UFO (Apareceu/Sumiu)
-        has_ufo = any(e.type == "UFO" for e in self.engine.entities)
-        if has_ufo and not self.ufo_playing:
-            if self.ufo_loop_sound:
-                self.ufo_loop_sound.play(loops=-1)
-                self.ufo_playing = True
-        elif not has_ufo and self.ufo_playing:
-            if self.ufo_loop_sound:
-                self.ufo_loop_sound.stop()
-                self.ufo_playing = False
+                self.sound_manager.play_sfx("shot", volume=0.3)
 
         # Game over
         if self.engine.game_over:
-            self._stop_all_loops()
-            self._play_sfx("gameover")
+            self.sound_manager.stop_all()
+            self.sound_manager.play_sfx("gameover")
             self.manager.switch_to("game_over", final_score=self.engine.score)
 
     def draw(self, screen: pg.Surface):

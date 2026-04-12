@@ -17,12 +17,15 @@ class AssetManager:
         """Carrega todos os assets definidos nos diretórios padrão."""
         if not pg.font.get_init():
             pg.font.init()
+        if not pg.mixer.get_init():
+            pg.mixer.init()
+
         self._load_fonts()
         self._load_sfx()
 
     def _load_fonts(self):
         # Localização: src/assets/fonts/
-        path = "src/assets/fonts"
+        path = os.path.join(os.getcwd(), "src", "assets", "fonts")
         required_fonts = {"main": 20, "big": 48}
 
         for key, size in required_fonts.items():
@@ -41,36 +44,23 @@ class AssetManager:
                 self.fonts[key] = pg.font.SysFont("Arial", size, bold=key == "big")
 
     def _load_sfx(self):
-        # Localização: src/assets/
-        path = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets/sfx"
-        )
-        path = os.path.normpath(path)
+        """Lê todos os arquivos .wav da pasta sfx e usa o nome como chave."""
+        path = os.path.join(os.getcwd(), "src", "assets", "sfx")
 
         if not os.path.exists(path):
             print(f"Warning: pasta de assets não encontrada: {path}")
             return
 
-        sfx_files = {
-            "bomber": "bomber.wav",
-            "gameover": "gameover.wav",
-            "intangi": "intangi.wav",
-            "objectdestroyed": "objectdestroyed.wav",
-            "ricoche": "ricoche.wav",
-            "shield": "shield.wav",
-            "shot": "shot.wav",
-            "spaceship1": "spaceship1.wav",
-            "timeresume": "timeresume.wav",
-            "timestop": "timestop.wav",
-        }
+        for filename in os.listdir(path):
+            if filename.endswith(".wav") or filename.endswith(".ogg"):
+                # "shot.wav" -> chave: "shot"
+                key = os.path.splitext(filename)[0]
+                full_path = os.path.join(path, filename)
 
-        for key, filename in sfx_files.items():
-            full_path = os.path.join(path, filename)
-            if os.path.exists(full_path):
                 try:
                     self.sounds[key] = pg.mixer.Sound(full_path)
-                except (IOError, TypeError):
-                    print(f"Warning: Could not load {filename}")
+                except Exception as e:
+                    print(f"Erro ao carregar {filename}: {e}")
 
     def get_sound(self, key: str) -> pg.mixer.Sound:
         return self.sounds.get(key)
