@@ -35,68 +35,96 @@ class PlayScene(BaseScene):
             "UFO_BULLET": BulletRenderer,
         }
 
+        # Ajusta volumes iniciais
+        if self.assets.get_sound("shot"):
+            self.assets.get_sound("shot").set_volume(0.6)
+        if self.assets.get_sound("objectdestroyed"):
+            self.assets.get_sound("objectdestroyed").set_volume(0.5)
+        if self.assets.get_sound("spaceship1"):
+            self.assets.get_sound("spaceship1").set_volume(0.4)
+        if self.assets.get_sound("gameover"):
+            self.assets.get_sound("gameover").set_volume(0.4)
+
+        # Guarda referência do som de thrust para controle contínuo
+        self.thrust_sound = self.assets.get_sound("spaceship1")
+        self.thrust_playing = False  # controla se o som já está tocando
+
     def handle_events(self, events: list[pg.event.Event]):
-        # Atualiza o estado das teclas e impulsos (tiro, etc)
         self.input_manager.update(events)
-        # Verifica se o usuário quer sair para o menu
         if self.input_manager.impulses["EXIT"]:
+            # Garante que o som de thrust para ao sair
+            if self.thrust_sound:
+                self.thrust_sound.stop()
             self.manager.switch_to("menu")
 
     def update(self, dt: float):
-        # 1. Busca a referência da nave no Core para aplicar comandos de movimento
         ship = next((e for e in self.engine.entities if e.type == "SHIP"), None)
         old_score = self.engine.score
 
         if ship and ship.is_active:
-            # Comandos Contínuos (Movimentação)
+            # Movimentação contínua
             if self.input_manager.commands["LEFT"]:
                 ship.rotate("L", dt)
             if self.input_manager.commands["RIGHT"]:
                 ship.rotate("R", dt)
-            if self.input_manager.commands["THRUST"]:
-                ship.apply_thrust(dt)
 
-            # Comandos de Impulso (Ações únicas)
+            # Thrust com som contínuo
+            thrusting = self.input_manager.commands["THRUST"]
+            if thrusting:
+                ship.apply_thrust(dt)
+                if self.thrust_sound and not self.thrust_playing:
+                    self.thrust_sound.play(loops=-1)
+                    self.thrust_playing = True
+            else:
+                if self.thrust_sound and self.thrust_playing:
+                    self.thrust_sound.stop()
+                    self.thrust_playing = False
+
+            # Tiro
             if self.input_manager.impulses["FIRE"]:
                 fire_data = ship.get_fire_data()
                 if fire_data:
                     self.engine.spawner.spawn_bullet(
                         fire_data["pos"], fire_data["vel"], "SHIP"
                     )
-                    sound = self.assets.get_sound("fire")
+                    sound = self.assets.get_sound("shot")
                     if sound:
                         sound.play()
 
+            # Hyperspace
             if self.input_manager.impulses["HYPER"]:
-                # Aplica o custo do hyperspace conforme logic do deprecated
                 if self.engine.score >= BALANCE.HYPERSPACE_COST:
                     ship.hyperspace()
                     self.engine.score -= BALANCE.HYPERSPACE_COST
 
-        # 2. Executa o passo da simulação física pura (Core)
+        # Atualiza simulação
         self.engine.update(dt)
 
+        # Som de explosão quando score aumenta
         if self.engine.score > old_score:
-            # Se o score aumentou, algo explodiu!
-            sound = self.assets.get_sound("bang_s")
+            sound = self.assets.get_sound("objectdestroyed")
             if sound:
                 sound.play()
-        # 3. Transição de Estado: Game Over
+
+        # Game over
         if self.engine.game_over:
+            if self.thrust_sound:
+                self.thrust_sound.stop()
+                self.thrust_playing = False
             self.manager.switch_to("game_over", final_score=self.engine.score)
+            sound = self.assets.get_sound("gameover")
+            if sound:
+                sound.play()
 
     def draw(self, screen: pg.Surface):
-        # Limpa a tela com a cor de fundo
         screen.fill(COLORS.BLACK)
 
-        # 1. Renderiza as Entidades usando a Infra
         for ent in self.engine.entities:
             if ent.is_active:
                 sprite = self.entity_sprite_map.get(ent.type)
                 if sprite:
                     sprite.draw(screen, ent)
 
-        # 2. Renderiza o HUD (Score e Lives)
         info = HUDInfo(
             self.engine.score, self.engine.lives, self.engine.wave_system.wave_count
         )
