@@ -6,7 +6,7 @@ import src.config.shared.dimensions as SCREEN
 from src.infra.scenes.menu_scene import MenuScene
 from src.infra.scenes.game_over import GameOverScene
 from src.infra.scenes.play_scene import PlayScene
-from src.infra.managers.sound_manager import SoundManager
+
 
 
 
@@ -19,9 +19,7 @@ class Game:
     def run(self):
         pg.init()
         # init audio
-        # game.py
-        sound_mgr = SoundManager()
-        sound_mgr.load_sounds()
+        pg.mixer.init()
 
         screen = pg.display.set_mode((SCREEN.WIDTH, SCREEN.HEIGHT))
         pg.display.set_caption(self.captions)

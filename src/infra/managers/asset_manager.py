@@ -41,19 +41,25 @@ class AssetManager:
                 self.fonts[key] = pg.font.SysFont("Arial", size, bold=key == "big")
 
     def _load_sfx(self):
-        # Localização: src/assets/sfx/
-        path = "src/assets/sfx"
+    # Localização: src/assets/
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets")
+        path = os.path.normpath(path)
+
         if not os.path.exists(path):
+            print(f"Warning: pasta de assets não encontrada: {path}")
             return
 
-        # Mapeamento de arquivos para nomes lógicos
         sfx_files = {
-            "fire": "fire.wav",
-            "bang_l": "bangLarge.wav",
-            "bang_m": "bangMedium.wav",
-            "bang_s": "bangSmall.wav",
-            "thrust": "thrust.wav",
-            "ufo_fire": "ufo_fire.wav",
+            "bomber":          "bomber.wav",
+            "gameover":        "gameover.wav",
+            "intangi":         "intangi.wav",
+            "objectdestroyed": "objectdestroyed.wav",
+            "ricoche":         "ricoche.wav",
+            "shield":          "shield.wav",
+            "shot":            "shot.wav",
+            "spaceship1":      "spaceship1.wav",
+            "timeresume":      "timeresume.wav",
+            "timestop":        "timestop.wav",
         }
 
         for key, filename in sfx_files.items():
@@ -62,7 +68,7 @@ class AssetManager:
                 try:
                     self.sounds[key] = pg.mixer.Sound(full_path)
                 except (IOError, TypeError):
-                    print(f"Warning: Could not load sfx from {path}. Using default.")
+                    print(f"Warning: Could not load {filename}")
 
     def get_sound(self, key: str) -> pg.mixer.Sound:
         return self.sounds.get(key)
