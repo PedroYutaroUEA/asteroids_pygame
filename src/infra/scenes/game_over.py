@@ -8,10 +8,9 @@ import src.config.shared.dimensions as SCREEN
 
 from .base_scene import BaseScene
 
-
 class GameOverScene(BaseScene):
     """Lida com a exibição da pontuação final e o temporizador de fade-in."""
-
+    
     def __init__(self, manager, assets, **kwargs):
         super().__init__(manager, assets)
         self.input_manager = InputManager()
@@ -66,3 +65,4 @@ class GameOverScene(BaseScene):
                 COLORS.GRAY,
                 center=True,
             )
+
