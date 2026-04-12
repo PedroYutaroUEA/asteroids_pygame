@@ -1,14 +1,15 @@
 import math
 import random
-from src.core.entities.base import PhysVec
-from src.core.entities.implementations import AsteroidEntity, UfoEntity, BulletEntity
+from src.core.entities.base.vector import PhysVec
 import src.config.shared as SHARED
 import src.config.server as SERVER
-from src.core.engine import SimulationEngine
+from src.core.entities.implementations.asteroid import AsteroidEntity
+from src.core.entities.implementations.bullet import BulletEntity
+from src.core.entities.implementations.ufo import UfoEntity
 
 
 class SpawnerSystem:
-    def __init__(self, engine: SimulationEngine):
+    def __init__(self, engine):
         self.engine = engine
 
     def spawn_asteroid(self, pos: PhysVec, vel: PhysVec, size: str):

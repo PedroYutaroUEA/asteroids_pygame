@@ -1,9 +1,8 @@
 import src.config.server as SERVER
-from src.core.engine import SimulationEngine
 
 
 class WaveSystem:
-    def __init__(self, engine: SimulationEngine):
+    def __init__(self, engine):
         self.engine = engine
         self.wave_count = 0
         self.wave_timer = SERVER.WAVE_DELAY

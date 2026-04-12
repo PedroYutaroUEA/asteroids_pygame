@@ -4,7 +4,9 @@ from typing import Literal
 import src.config.server.physics as PHYS
 import src.config.server.balancing as BALANCE
 import src.config.shared as SHARED
-from src.core.entities.base import Entity, PhysVec
+
+from src.core.entities.base.entity import Entity
+from src.core.entities.base.vector import PhysVec
 
 
 class ShipEntity(Entity):

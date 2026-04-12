@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 import pygame as pg
-from src.core.entities.base import Entity
+
+from src.core.entities.base.entity import Entity
 
 
 class EntityRenderer(ABC):

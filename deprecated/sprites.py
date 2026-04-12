@@ -7,7 +7,7 @@ from random import uniform
 import pygame as pg
 
 import src.config as C
-from src.deprecated.utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
+from deprecated.utils import Vec, angle_to_vec, draw_circle, draw_poly, wrap_pos
 
 
 class Bullet(pg.sprite.Sprite):

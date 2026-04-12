@@ -1,4 +1,5 @@
-from src.core.entities.base import Entity, PhysVec
+from src.core.entities.base.entity import Entity
+from src.core.entities.base.vector import PhysVec
 import src.config.server.physics as PHYS
 
 

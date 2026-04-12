@@ -8,8 +8,8 @@ from dataclasses import dataclass
 import pygame as pg
 
 import src.config as C
-from src.deprecated.systems import World
-from src.deprecated.utils import text
+from deprecated.systems import World
+from deprecated.utils import text
 
 
 @dataclass

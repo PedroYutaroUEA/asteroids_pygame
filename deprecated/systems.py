@@ -7,8 +7,8 @@ from random import uniform
 import pygame as pg
 
 import src.config as C
-from src.deprecated.sprites import Asteroid, Ship, UFO
-from src.deprecated.utils import Vec, rand_edge_pos, rand_unit_vec
+from deprecated.sprites import Asteroid, Ship, UFO
+from deprecated.utils import Vec, rand_edge_pos, rand_unit_vec
 
 
 class World:

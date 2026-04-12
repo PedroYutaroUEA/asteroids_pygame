@@ -1,8 +1,13 @@
-from src.core.entities.base import Entity
+from src.core.entities.base.entity import Entity
+
 from src.core.entities.implementations.ship import ShipEntity
-from src.core.systems import WaveSystem, SpawnerSystem, CollisionSystem
+
+
 import src.config.server as SERVER
 import src.config.shared as SHARED
+from src.core.systems.spawner import SpawnerSystem
+from src.core.systems.collisions import CollisionSystem
+from src.core.systems.wave import WaveSystem
 
 
 class SimulationEngine:

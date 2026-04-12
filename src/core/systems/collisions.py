@@ -1,13 +1,16 @@
 import math
 import random
-from src.core.entities.base import PhysVec
+
+from src.core.entities.base.vector import PhysVec
+
 import src.config.server as SERVER
 import src.config.shared as SHARED
-from src.core.engine import SimulationEngine
 
 
 class CollisionSystem:
-    def __init__(self, engine: SimulationEngine):
+    """Manages collisions rules on game"""
+
+    def __init__(self, engine):
         self.engine = engine
         # Mapeamento de pares de tipos para métodos de reação.
         # O par é sempre ordenado alfabeticamente para evitar duplicidade (ex: SHIP antes de UFO).

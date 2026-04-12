@@ -1,7 +1,7 @@
 import random
 import math
-from src.core.entities.base import Entity, PhysVec
-
+from src.core.entities.base.entity import Entity
+from src.core.entities.base.vector import PhysVec
 import src.config.server.balancing as BALANCE
 import src.config.server as SERVER
 import src.config.shared as SHARED
@@ -9,10 +9,10 @@ import src.config.shared as SHARED
 
 class UfoEntity(Entity):
     def __init__(self, pos: PhysVec, vel: PhysVec, is_small: bool):
-        self.profle: SERVER.UfoProfileTypes = "SMALL" if is_small else "BIG"
-        gp_profile = SERVER.UFO_PROFILES[self.profle]
+        self.profile: SERVER.UfoProfileTypes = "SMALL" if is_small else "BIG"
+        gp_profile = SERVER.UFO_PROFILES[self.profile]
 
-        radius = SHARED.UFO_RADIUS[self.profle]
+        radius = SHARED.UFO_RADIUS[self.profile]
 
         super().__init__(pos, vel, rad=radius, angle=0)
 

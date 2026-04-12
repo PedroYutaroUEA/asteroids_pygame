@@ -1,7 +1,7 @@
 import math
 import pygame as pg
-from src.infra.rendering.base import EntityRenderer
-from src.core.entities.implementations import ShipEntity
+from src.core.entities.implementations.ship import ShipEntity
+from src.infra.renderers.entities.base import EntityRenderer
 import src.config.client as COLOR
 
 
