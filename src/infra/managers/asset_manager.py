@@ -41,8 +41,10 @@ class AssetManager:
                 self.fonts[key] = pg.font.SysFont("Arial", size, bold=key == "big")
 
     def _load_sfx(self):
-    # Localização: src/assets/
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets")
+        # Localização: src/assets/
+        path = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets/sfx"
+        )
         path = os.path.normpath(path)
 
         if not os.path.exists(path):
@@ -50,16 +52,16 @@ class AssetManager:
             return
 
         sfx_files = {
-            "bomber":          "bomber.wav",
-            "gameover":        "gameover.wav",
-            "intangi":         "intangi.wav",
+            "bomber": "bomber.wav",
+            "gameover": "gameover.wav",
+            "intangi": "intangi.wav",
             "objectdestroyed": "objectdestroyed.wav",
-            "ricoche":         "ricoche.wav",
-            "shield":          "shield.wav",
-            "shot":            "shot.wav",
-            "spaceship1":      "spaceship1.wav",
-            "timeresume":      "timeresume.wav",
-            "timestop":        "timestop.wav",
+            "ricoche": "ricoche.wav",
+            "shield": "shield.wav",
+            "shot": "shot.wav",
+            "spaceship1": "spaceship1.wav",
+            "timeresume": "timeresume.wav",
+            "timestop": "timestop.wav",
         }
 
         for key, filename in sfx_files.items():

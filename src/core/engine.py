@@ -17,6 +17,7 @@ class SimulationEngine:
 
     def __init__(self):
         self.entities: list[Entity] = []
+        self.events: list[str] = []
         self.score = 0
         self.lives = SERVER.START_LIVES
         self.game_over = False
@@ -33,11 +34,14 @@ class SimulationEngine:
         self.ufo_spawn_timer = SERVER.UFO_SPAWN_EVERY
 
     def spawn_player(self):
+        """creates player entity"""
         player = ShipEntity(SHARED.WIDTH / 2, SHARED.HEIGHT / 2)
         player.invuln_timer = SERVER.SAFE_SPAWN_TIME
         self.entities.append(player)
 
     def update(self, dt: float):
+        """Main game frame function"""
+        self.events.clear()
         if self.game_over:
             return
 
@@ -73,3 +77,4 @@ class SimulationEngine:
                 fire_data = ufo.try_fire_at(ship.pos, dt)
                 if fire_data:
                     self.spawner.spawn_bullet(fire_data["pos"], fire_data["vel"], "UFO")
+                    self.events.append("UFO_FIRE")
