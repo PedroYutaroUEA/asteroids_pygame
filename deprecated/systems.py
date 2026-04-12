@@ -1,4 +1,3 @@
-
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file coordinates world state, spawning, collisions, scoring, and progression.
 
@@ -7,9 +6,9 @@ from random import uniform
 
 import pygame as pg
 
-import config as C
-from sprites import Asteroid, Ship, UFO
-from utils import Vec, rand_edge_pos, rand_unit_vec
+import src.config as C
+from deprecated.sprites import Asteroid, Ship, UFO
+from deprecated.utils import Vec, rand_edge_pos, rand_unit_vec
 
 
 class World:
@@ -145,8 +144,7 @@ class World:
         for ufo in list(self.ufos):
             for b in list(self.bullets):
                 if (ufo.pos - b.pos).length() < (ufo.r + b.r):
-                    score = (C.UFO_SMALL["score"] if ufo.small
-                             else C.UFO_BIG["score"])
+                    score = C.UFO_SMALL["score"] if ufo.small else C.UFO_BIG["score"]
                     self.score += score
                     ufo.kill()
                     b.kill()

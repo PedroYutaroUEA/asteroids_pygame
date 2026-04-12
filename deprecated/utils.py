@@ -1,4 +1,3 @@
-
 # ASTEROIDE SINGLEPLAYER v1.0
 # This file provides shared math, drawing, and random helper utilities.
 
@@ -8,7 +7,7 @@ from typing import Iterable, Tuple
 
 import pygame as pg
 
-import config as C
+import src.config as C
 
 Vec = pg.math.Vector2
 
