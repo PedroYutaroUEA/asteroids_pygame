@@ -63,7 +63,10 @@ class AssetManager:
                     print(f"Erro ao carregar {filename}: {e}")
 
     def get_sound(self, key: str) -> pg.mixer.Sound:
-        return self.sounds.get(key)
+        sound = self.sounds.get(key)
+        if not sound:
+            return None
+        return sound
 
     def get_font(self, key: str) -> pg.font.Font:
         return self.fonts.get(key, self.fonts.get("main"))
