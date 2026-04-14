@@ -9,12 +9,15 @@ class TripleShotShip(ShipEntity):
     """Nave 2: Tiro Triplo."""
 
     def __init__(self, x, y):
-        super().__init__(x, y)
         self.ship_class = "TRIPLE"
+        self.p_cooldown = GAMEPLAY.SHIP_DATA[self.ship_class]["cooldown"]
+        self.p_duration = GAMEPLAY.SHIP_DATA[self.ship_class]["duration"]
+        super().__init__(x, y, self.p_cooldown)
 
-    def activate_power(self) -> bool:
+    def activate_power(self):
         if super().activate_power():
-            self.power_timer = GAMEPLAY.SHIP_DATA["TRIPLE"]["duration"]
+            self.power_timer = self.p_duration
+            self.max_power_duration = self.p_duration
             return True
         return False
 

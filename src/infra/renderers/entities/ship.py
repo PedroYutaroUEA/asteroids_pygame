@@ -18,6 +18,9 @@ class ShipRenderer(EntityRenderer):
             if (pg.time.get_ticks() // 100) % 2 == 0:
                 base_color = (50, 50, 50)  # "Sombra" da nave
 
+        if entity.power_active and entity.max_power_duration > 0:
+            ShipRenderer.__draw_power_countdown(surface, entity, base_color)
+
         # 1. Calcular vértices do polígono baseado na entidade lógica e desenha
         points = ShipRenderer.__calc_vertices(entity)
         pg.draw.polygon(surface, base_color, points, width=1)
@@ -33,6 +36,31 @@ class ShipRenderer(EntityRenderer):
         # 5. Feedback Visual: Time Stop (Aura dourada se o tempo estiver parado)
         if entity.power_active and entity.ship_class == "TIMESTOP":
             ShipRenderer.__draw_timestop(surface, entity)
+
+    @staticmethod
+    def __draw_power_countdown(surface, entity, color):
+        """Desenha um arco que diminui conforme o tempo do poder acaba."""
+        # Cria uma superfície temporária para opacidade
+        overlay = pg.Surface((entity.rad * 4, entity.rad * 4), pg.SRCALPHA)
+        center = (entity.rad * 2, entity.rad * 2)
+
+        # Calcula o ângulo do arco (proporcional ao tempo restante)
+        ratio = entity.power_timer / entity.max_power_duration
+        angle = 360 * ratio
+
+        # Cor com 50% de opacidade (128)
+        arc_color = (*color, 128)
+
+        rect = pg.Rect(0, 0, entity.rad * 2.5, entity.rad * 2.5)
+        rect.center = center
+
+        # Desenha o arco (Pygame usa radianos e inverte a direção as vezes,
+        # aqui simplificamos para um circulo que diminui o raio ou um arco)
+        pg.draw.arc(overlay, arc_color, rect, 0, math.radians(angle), 3)
+
+        surface.blit(
+            overlay, (entity.pos.x - entity.rad * 2, entity.pos.y - entity.rad * 2)
+        )
 
     @staticmethod
     def __calc_vertices(entity: "ShipEntity") -> list[tuple]:

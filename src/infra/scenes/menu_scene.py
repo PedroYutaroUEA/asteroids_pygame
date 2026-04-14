@@ -1,7 +1,6 @@
 import pygame as pg
 
 from src.core.entities.implementations.ships.base import ShipEntity
-from src.infra.renderers.entities.ship import ShipRenderer
 from src.infra.renderers.ui.components.ship_selector import ShipSelectorComponent
 from src.infra.renderers.ui.components.text import TextComponent
 from src.infra.managers.input_manager import InputManager
@@ -60,7 +59,7 @@ class MenuScene(BaseScene):
         # Título
         TextComponent.draw(
             screen,
-            "ESTEROIDES",
+            "ASTEROIDS",
             (SCREEN.WIDTH // 2, 80),
             self.font_big,
             COLORS.WHITE,

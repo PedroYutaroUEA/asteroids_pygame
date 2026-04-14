@@ -1,11 +1,9 @@
 import pygame as pg
 
 import src.config.client.styles as COLORS
-import src.config.server.balancing as BALANCE
 
 from src.core.engine import SimulationEngine
 
-from src.core.entities.implementations.ships.base import ShipEntity
 from src.infra.controllers.player_controller import PlayerController
 from src.infra.managers.input_manager import InputManager
 
@@ -54,7 +52,6 @@ class PlayScene(BaseScene):
                 self.sound_manager.play_sfx("shot", volume=0.3)
 
     def _handle_game_over(self):
-        ship = next((e for e in self.engine.entities if e.type == "SHIP"), None)
         self.sound_manager.stop_all()
         self.sound_manager.play_sfx("gameover")
 
@@ -63,7 +60,7 @@ class PlayScene(BaseScene):
             final_score=self.engine.score,
             waves=self.engine.current_wave,
             ship_class=self.engine.ship_type,
-            power_uses=ship.power_use_count if ship else 0,
+            power_uses=self.engine.power_use_count,
             time=self.engine.play_time,
         )
 
@@ -111,7 +108,12 @@ class PlayScene(BaseScene):
                 if sprite:
                     sprite.draw(screen, ent)
 
+        ship = next((e for e in self.engine.entities if e.type == "SHIP"), None)
         info = HUDInfo(
-            self.engine.score, self.engine.lives, self.engine.wave_system.wave_count
+            score=self.engine.score,
+            lives=self.engine.lives,
+            wave=self.engine.wave_system.wave_count,
+            power_cooldown=ship.power_cooldown if ship else 0,
+            power_ready=ship.can_activate_power() if ship else False,
         )
         HUDRenderer.draw(screen, self.assets, info)

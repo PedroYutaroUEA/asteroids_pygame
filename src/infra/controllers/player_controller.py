@@ -1,4 +1,3 @@
-import src.config.server.balancing as BALANCE
 from src.core.engine import SimulationEngine
 from src.core.entities.implementations.ships.base import ShipEntity
 from src.infra.managers.input_manager import InputManager
@@ -32,7 +31,7 @@ class PlayerController:
         engine: SimulationEngine,
     ):
         if ship.activate_power():
-            ship.power_use_count += 1
+            engine.power_use_count += 1
 
             sfx_map = {
                 "INTANGIBLE": "intangi",

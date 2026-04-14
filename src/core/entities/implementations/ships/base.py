@@ -1,7 +1,6 @@
 import math
 from typing import Literal
 import src.config.server.physics as PHYS
-import src.config.server.balancing as BALANCE
 import src.config.shared as SHARED
 
 from src.core.entities.base.entity import Entity
@@ -15,19 +14,18 @@ class ShipEntity(Entity):
         super().__init__(
             pos=PhysVec(x, y), vel=PhysVec(0, 0), angle=-90, rad=SHARED.SHIP_RADIUS
         )
-        self.type = "SHIP"  # SEMPRE "SHIP" para o Core e Sistemas
-        self.ship_class = "DEFAULT"  # Diferenciador para a UI
-        # Estado do Poder
+        self.type = "SHIP"
+        self.ship_class = "DEFAULT"
         self.power_active = False
         self.power_timer = 0.0
-        self.power_cooldown = 0
+        self.max_power_duration = 1.0
+
+        self.power_cooldown = 0.0
         self.power_cooldown_max = power_cooldown
-        self.power_use_count = 0  # Estatística para o Game Over
 
         self.invuln_timer = 0.0
         self.fire_cool = 0.0
-
-        self.is_intangible = False  # Flag para o CollisionSystem
+        self.is_intangible = False
         self.thrust_power = PHYS.SHIP_THRUST
         self.friction = PHYS.SHIP_FRICTION
 
@@ -51,6 +49,13 @@ class ShipEntity(Entity):
     def can_activate_power(self) -> bool:
         return not self.power_active and self.power_cooldown <= 0
 
+    def activate_power(self) -> bool:
+        """Contrato para os superpoderes. Retorna True se o poder foi ativado."""
+        if self.can_activate_power():
+            self.power_active = True
+            return True
+        return False
+
     def deactivate_power(self):
         self.power_active = False
         self.power_timer = 0.0
@@ -64,13 +69,6 @@ class ShipEntity(Entity):
         rad = math.radians(self.angle)
         self.vel.x += math.cos(rad) * self.thrust_power * dt
         self.vel.y += math.sin(rad) * self.thrust_power * dt
-
-    def activate_power(self) -> bool:
-        """Contrato para os superpoderes. Retorna True se o poder foi ativado."""
-        if self.can_activate_power():
-            self.power_use_count += 1
-            self.power_active = True
-        return self.power_active
 
     def get_fire_data(self) -> list[dict]:
         """Retorna dados para o Spawner criar a bala"""

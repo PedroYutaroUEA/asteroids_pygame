@@ -26,6 +26,7 @@ class SimulationEngine:
         self.score = 0
         self.play_time = 0.0
         self.current_wave = 0
+        self.power_use_count = 0
         self.lives = SERVER.START_LIVES
         self.game_over = False
         self.ship_type = ship_type
