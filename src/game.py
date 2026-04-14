@@ -8,8 +8,6 @@ from src.infra.scenes.game_over import GameOverScene
 from src.infra.scenes.play_scene import PlayScene
 
 
-
-
 class Game:
     """main game runner"""
 

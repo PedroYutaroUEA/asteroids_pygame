@@ -28,6 +28,20 @@ class HUDRenderer:
             center=True,
         )
 
+        status_text = (
+            "READY" if info.power_ready else f"COOLDOWN: {int(info.power_cooldown)}s"
+        )
+        status_color = (0, 255, 0) if info.power_ready else (255, 100, 100)
+
+        TextComponent.draw(
+            surface,
+            f"POWER - {status_text}",
+            (SCREEN.WIDTH // 2, 35),
+            font,
+            status_color,
+            center=True,
+        )
+
         # 3. Desenha Vidas (Canto superior direito)
         TextComponent.draw(
             surface, f"LIVES {info.lives}", (SCREEN.WIDTH - 120, 15), font, COLORS.WHITE

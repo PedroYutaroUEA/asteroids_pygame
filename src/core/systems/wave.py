@@ -7,7 +7,7 @@ class WaveSystem:
         self.wave_count = 0
         self.wave_timer = SERVER.WAVE_DELAY
 
-    def update(self, dt):
+    def update(self, dt) -> int:
         # Filtra asteroides ativos
         asteroids = [e for e in self.engine.entities if e.type == "ASTEROID"]
 
@@ -17,6 +17,7 @@ class WaveSystem:
                 self.wave_timer = SERVER.WAVE_DELAY
             else:
                 self.wave_timer -= dt
+        return self.wave_count
 
     def _start_next_wave(self):
         self.wave_count += 1

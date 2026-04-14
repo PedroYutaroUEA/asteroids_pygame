@@ -8,3 +8,5 @@ class HUDInfo:
     score: int
     lives: int
     wave: int
+    power_cooldown: float
+    power_ready: bool

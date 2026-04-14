@@ -12,8 +12,6 @@ class CollisionSystem:
 
     def __init__(self, engine):
         self.engine = engine
-        # Mapeamento de pares de tipos para métodos de reação.
-        # O par é sempre ordenado alfabeticamente para evitar duplicidade (ex: SHIP antes de UFO).
         self.handlers = {
             ("ASTEROID", "BULLET"): self._handle_asteroid_projectile,
             ("ASTEROID", "UFO_BULLET"): self._handle_asteroid_projectile,
@@ -34,15 +32,28 @@ class CollisionSystem:
                         self.handlers[pair](a, b)
 
     # --- HANDLERS DE REAÇÃO ---
-
     def _handle_asteroid_projectile(self, obj_a, obj_b):
         """Lida com qualquer projétil (Player ou UFO) atingindo um asteroide."""
         asteroid = obj_a if obj_a.type == "ASTEROID" else obj_b
         projectile = obj_b if obj_a.type == "ASTEROID" else obj_a
 
-        projectile.is_active = False
-        asteroid.is_active = False
+        # MECÂNICA RICOCHETE (Nave 5)
+        if projectile.type == "BULLET" and getattr(projectile, "can_ricochet", False):
+            dx, dy = (
+                projectile.pos.x - asteroid.pos.x,
+                projectile.pos.y - asteroid.pos.y,
+            )
+            dist = math.sqrt(dx**2 + dy**2)
+            if dist != 0:
+                nx, ny = dx / dist, dy / dist  # Normal
+                dot = projectile.vel.x * nx + projectile.vel.y * ny
+                projectile.vel.x -= 2 * dot * nx
+                projectile.vel.y -= 2 * dot * ny
+                projectile.bounces += 1
+        else:
+            projectile.is_active = False
 
+        asteroid.is_active = False
         # Pontuação apenas se for bala do jogador (BULLET)
         if projectile.type == "BULLET":
             self.engine.score += SERVER.AST_SCORES[asteroid.size]
@@ -54,9 +65,16 @@ class CollisionSystem:
         ufo = obj_a if obj_a.type == "UFO" else obj_b
         bullet = obj_b if obj_a.type == "UFO" else obj_a
 
-        bullet.is_active = False
-        ufo.is_active = False
+        # Ricochete no UFO também
+        if bullet.type == "BULLET" and getattr(bullet, "can_ricochet", False):
+            # Simples inversão para o UFO
+            bullet.vel.x *= -1
+            bullet.vel.y *= -1
+            bullet.bounces += 1
+        else:
+            bullet.is_active = False
 
+        ufo.is_active = False
         # Define score baseado no tipo de UFO (Small ou Big)
         score = SERVER.UFO_PROFILES[ufo.profile]["score"]
         self.engine.score += score
@@ -64,7 +82,29 @@ class CollisionSystem:
     def _handle_ship_collision(self, obj_a, obj_b):
         """Lida com a nave batendo em Asteroides, UFOs ou balas de UFO."""
         ship = obj_a if obj_a.type == "SHIP" else obj_b
-        other = obj_b if obj_a.type == "SHIP" else obj_a
+        other = obj_b if ship == obj_a else obj_a
+
+        if ship.type != "SHIP":
+            return
+        if hasattr(ship, "is_intangible") and ship.is_intangible:
+            return
+
+        if getattr(ship, "has_reflector", False):
+            dx = other.pos.x - ship.pos.x
+            dy = other.pos.y - ship.pos.y
+            dist = math.sqrt(dx**2 + dy**2) or 1
+            nx, ny = dx / dist, dy / dist  # Direção do empurrão
+
+            # 1. Separação física imediata (Pula para fora do raio para não colidir no próximo frame)
+            overlap = (ship.rad + other.rad) - dist
+            other.pos.x += nx * (overlap + 5)
+            other.pos.y += ny * (overlap + 5)
+
+            # 2. Define velocidade de rebatida fixa (evita acumulo infinito)
+            bounce_speed = 200
+            other.vel.x = nx * bounce_speed
+            other.vel.y = ny * bounce_speed
+            return
 
         # Só processa se a nave não estiver invulnerável (Safe Spawn)
         if ship.invuln_timer <= 0:

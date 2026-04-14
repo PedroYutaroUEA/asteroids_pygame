@@ -1,8 +1,8 @@
 import math
 import pygame as pg
-from src.core.entities.implementations.ship import ShipEntity
+from src.core.entities.implementations.ships.base import ShipEntity
 from src.infra.renderers.entities.base import EntityRenderer
-import src.config.client as COLOR
+import src.config.client.styles as STYLES
 
 
 class ShipRenderer(EntityRenderer):
@@ -10,14 +10,57 @@ class ShipRenderer(EntityRenderer):
 
     @staticmethod
     def draw(surface: pg.Surface, entity: "ShipEntity"):
-        # 1. Calcular vértices do polígono baseado na entidade lógica
-        points = ShipRenderer.__calc_vertices(entity)
-        # 2. Desenhar a nave
-        pg.draw.polygon(surface, COLOR.WHITE, points, width=1)
+        # 1. Pega a cor temática baseada na classe da nave
+        base_color = STYLES.SHIP_COLORS.get(entity.ship_class, STYLES.WHITE)
 
-        # 3. Desenhar feedback visual de invulnerabilidade (se houver)
-        if entity.invuln_timer > 0:
+        # 2. Efeito Visual: Intangibilidade (Piscar)
+        if hasattr(entity, "is_intangible") and entity.is_intangible:
+            if (pg.time.get_ticks() // 100) % 2 == 0:
+                base_color = (50, 50, 50)  # "Sombra" da nave
+
+        if entity.power_active and entity.max_power_duration > 0:
+            ShipRenderer.__draw_power_countdown(surface, entity, base_color)
+
+        # 1. Calcular vértices do polígono baseado na entidade lógica e desenha
+        points = ShipRenderer.__calc_vertices(entity)
+        pg.draw.polygon(surface, base_color, points, width=1)
+
+        # 6. Invulnerabilidade de Spawn (Blink padrão)
+        if entity.invuln_timer > 0 and (pg.time.get_ticks() // 100) % 2 == 0:
             ShipRenderer.__draw_invuln(surface, entity)
+
+        # 4. Feedback Visual: Escudo (Nave 3)
+        if hasattr(entity, "has_reflector") and entity.has_reflector:
+            ShipRenderer.__draw_reflector(surface, entity)
+
+        # 5. Feedback Visual: Time Stop (Aura dourada se o tempo estiver parado)
+        if entity.power_active and entity.ship_class == "TIMESTOP":
+            ShipRenderer.__draw_timestop(surface, entity)
+
+    @staticmethod
+    def __draw_power_countdown(surface, entity, color):
+        """Desenha um arco que diminui conforme o tempo do poder acaba."""
+        # Cria uma superfície temporária para opacidade
+        overlay = pg.Surface((entity.rad * 4, entity.rad * 4), pg.SRCALPHA)
+        center = (entity.rad * 2, entity.rad * 2)
+
+        # Calcula o ângulo do arco (proporcional ao tempo restante)
+        ratio = entity.power_timer / entity.max_power_duration
+        angle = 360 * ratio
+
+        # Cor com 50% de opacidade (128)
+        arc_color = (*color, 128)
+
+        rect = pg.Rect(0, 0, entity.rad * 2.5, entity.rad * 2.5)
+        rect.center = center
+
+        # Desenha o arco (Pygame usa radianos e inverte a direção as vezes,
+        # aqui simplificamos para um circulo que diminui o raio ou um arco)
+        pg.draw.arc(overlay, arc_color, rect, 0, math.radians(angle), 3)
+
+        surface.blit(
+            overlay, (entity.pos.x - entity.rad * 2, entity.pos.y - entity.rad * 2)
+        )
 
     @staticmethod
     def __calc_vertices(entity: "ShipEntity") -> list[tuple]:
@@ -46,7 +89,29 @@ class ShipRenderer(EntityRenderer):
     def __draw_invuln(surface: pg.Surface, entity: "ShipEntity"):
         pg.draw.circle(
             surface,
-            COLOR.GRAY,
+            STYLES.WHITE,
+            (int(entity.pos.x), int(entity.pos.y)),
+            entity.rad + 2,
+            width=1,
+        )
+
+    @staticmethod
+    def __draw_reflector(surface: pg.Surface, entity: "ShipEntity"):
+        """Círculo pulsante ao redor"""
+        pulse = math.sin(pg.time.get_ticks() * 0.01) * 3
+        pg.draw.circle(
+            surface,
+            STYLES.SHIP_COLORS["SHIELD"],
+            (int(entity.pos.x), int(entity.pos.y)),
+            int(entity.rad + 10 + pulse),
+            width=1,
+        )
+
+    @staticmethod
+    def __draw_timestop(surface: pg.Surface, entity: "ShipEntity"):
+        pg.draw.circle(
+            surface,
+            STYLES.SHIP_COLORS["TIMESTOP"],
             (int(entity.pos.x), int(entity.pos.y)),
             entity.rad + 5,
             width=1,

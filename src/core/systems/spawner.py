@@ -31,8 +31,23 @@ class SpawnerSystem:
         ufo = UfoEntity(pos, vel, is_small)
         self.engine.entities.append(ufo)
 
-    def spawn_bullet(self, pos: PhysVec, vel: PhysVec, source_type: str):
-        bullet = BulletEntity(pos, vel)
+    def spawn_bullet(
+        self,
+        pos: PhysVec,
+        vel: PhysVec,
+        source_type: str,
+        rad=2,
+        ricochet=False,
+        max_bounces=5,
+    ):
+        bullet = BulletEntity(
+            pos=pos,
+            vel=vel,
+            rad=rad,
+            can_ricochet=ricochet,
+            max_bounces=max_bounces,
+            source=source_type,
+        )
         bullet.type = "BULLET" if source_type == "SHIP" else "UFO_BULLET"
         self.engine.entities.append(bullet)
 
